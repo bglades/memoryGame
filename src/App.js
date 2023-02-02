@@ -19,8 +19,8 @@ function App() {
   const [turns, setTurns] = useState(0)
   const [choiceOne, setChoiceOne] = useState(null)
   const [choiceTwo, setChoiceTwo] = useState(null)
-
-  /* shuffles cards and gives each a new id. This function does 3 things: 
+  const [disabled, setDisabled] = useState(false)
+    /* shuffles cards and gives each a new id. This function does 3 things: 
   1) Creates an array of 12 total cards by having two ...cardImages. 
   2) Shuffles images by using sort method creating a shuffled array. 
   3) Maps each to a new array and adds a new randomized id number. */
@@ -29,17 +29,12 @@ function App() {
       .sort(() => Math.random() - 0.5)
       .map((card) => ({ ...card, id: Math.random() }))
 
+      setChoiceOne(null)
+      setChoiceTwo(null)
       setCards(shuffledCards)
       setTurns(0)
   }
-  // function resolveAfter2Seconds() {
-  //   return new Promise(resolve => {
-  //     setTimeout(() => {
-  //       resolve('resolved');
-  //       console.log(choiceOne, choiceTwo)
-  //     }, 2000);
-  //   });
-  //}
+
   
 
 async function handleChoice(card){
@@ -50,10 +45,12 @@ async function handleChoice(card){
 //   setTimeout(console.log('choiceOne',choiceOne),3000)
 }
 
+
+
 //useEffect to compare 2 cards
 useEffect(()=>{
-if (
-  choiceOne && choiceTwo){
+if (choiceOne && choiceTwo){
+    setDisabled(true)
     if (choiceOne.src === choiceTwo.src){
       setCards(prevCards => {
         return prevCards.map(card => {
@@ -71,21 +68,24 @@ else {
 }}
 }, [choiceOne, choiceTwo])
 
-console.log(cards)
+useEffect(()=>{
+  shuffleCards()
+},[])
 
 const resetTurn = () => {
   setChoiceOne(null)
   setChoiceTwo(null)
-  
   setTurns(prevTurns => prevTurns +1)
+  setDisabled(false)
   // console.log('fromResetTurnFucntion', choiceOne, choiceTwo)
 }
 
   return (
     <div className="App">
       <h1>Magic Match</h1>
+      
       <button onClick={shuffleCards}>New Game</button>
-
+      <p>turns: {turns}</p>
       <div className='card-grid'>
         {cards.map(card => (
           <SingleCard 
@@ -93,8 +93,10 @@ const resetTurn = () => {
           card={card} 
           choice={handleChoice}
           flipped={ card === choiceOne || card === choiceTwo || card.matched}
+          disabled={disabled}
           />
         ))}
+        
       </div>
     </div>
   );
